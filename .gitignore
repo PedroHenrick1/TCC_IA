@@ -1,0 +1,41 @@
+# Arquivos de Segredos e Configuração de Ambiente
+# ESSENCIAL para não vazar sua chave da OpenAI ou senhas de banco de dados!
+.env
+.env.*
+
+# Banco de Dados
+# O banco de dados de desenvolvimento não deve ser versionado.
+# Cada desenvolvedor terá o seu, e o de produção será diferente.
+db.sqlite3
+db.sqlite3-journal
+
+# Ambiente Virtual Python
+# A pasta do ambiente virtual nunca deve ser enviada.
+# Ela contém todos os pacotes instalados e pode ser muito pesada.
+# A forma correta de compartilhar as dependências é com um arquivo requirements.txt.
+venv/
+.venv/
+env/
+virtualenv/
+
+# Arquivos temporários e de cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Arquivos de Projeto Django
+# Logs, arquivos estáticos coletados e mídias de upload não devem ser versionados.
+*.log
+staticfiles/
+media/
+
+# Arquivos de configuração de IDEs e Editores
+# Configurações pessoais do seu editor de código não interessam ao resto da equipe.
+.idea/
+.vscode/
+*.swp
+
+# Arquivos de Sistema Operacional
+.DS_Store
+Thumbs.db

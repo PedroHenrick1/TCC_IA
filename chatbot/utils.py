@@ -1,0 +1,37 @@
+from pathlib import Path
+from docling.document_converter import DocumentConverter
+from .models import ProcessedDocument
+
+def process_pdfs_in_folder(folder_path: str):
+    folder = Path(folder_path)
+    converter = DocumentConverter()
+
+    for pdf_file in folder.glob("*.pdf"):
+        print('passei antes do file_hash')
+        file_hash = ProcessedDocument.calculate_hash(pdf_file)
+        doc_entry = ProcessedDocument.objects.filter(file_path=str(pdf_file)).first()
+
+        # Verifica se já existe e se o conteúdo mudou
+        if doc_entry and doc_entry.file_hash == file_hash:
+            print(f"Já processado: {pdf_file.name}")
+            continue
+
+        print(f"Processando: {pdf_file.name}")
+        result = converter.convert(str(pdf_file)).document
+        content = result.export_to_markdown()
+
+        if doc_entry:
+            doc_entry.file_hash = file_hash
+            doc_entry.content = content
+            doc_entry.save()
+        else:
+            ProcessedDocument.objects.create(
+                file_path=str(pdf_file),
+                file_hash=file_hash,
+                content=content
+            )
+
+
+def load_all_docs():
+    docs = ProcessedDocument.objects.all().values_list("content", flat=True)
+    return "\n\n".join(docs)
