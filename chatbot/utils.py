@@ -1,12 +1,14 @@
 from pathlib import Path
 from docling.document_converter import DocumentConverter
 from .models import ProcessedDocument
+from itertools import chain
 
 def process_pdfs_in_folder(folder_path: str):
     folder = Path(folder_path)
     converter = DocumentConverter()
+    files = chain(folder.glob("*.pdf"), folder.glob("*.docx"), folder.glob("*.txt"), folder.glob("*.csv"))
 
-    for pdf_file in folder.glob("*.pdf"):
+    for pdf_file in files:
         print('passei antes do file_hash')
         file_hash = ProcessedDocument.calculate_hash(pdf_file)
         doc_entry = ProcessedDocument.objects.filter(file_path=str(pdf_file)).first()

@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains import ConversationChain
-from langchain_openai import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import (
     ChatPromptTemplate,
@@ -19,7 +18,7 @@ from .memory import DjangoDBChatMessageHistory
 from .utils import load_all_docs, process_pdfs_in_folder
 
 load_dotenv()
-folder_path = "/home/pedro/ProjetosVScode/chatbot_Site_Uesc/project/pdfs"
+folder_path = "/TCC_IA/pdfs"
 
 class ChatAPIView(APIView):
     def post(self, request):
