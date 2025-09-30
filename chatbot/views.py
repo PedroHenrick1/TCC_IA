@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.chains import ConversationChain
+from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import (
     ChatPromptTemplate,
@@ -39,12 +39,6 @@ class ChatAPIView(APIView):
                 google_api_key=os.getenv("GOOGLE_API_KEY")
             )
             print('passei antes de memory')
-            
-            memory = ConversationBufferMemory(
-                memory_key="history",
-                chat_memory=DjangoDBChatMessageHistory(session_id=session_id),
-                return_messages=True
-            )
 
             print('passei depois de memory')
             prompt = ChatPromptTemplate.from_messages([
@@ -55,15 +49,23 @@ class ChatAPIView(APIView):
                 HumanMessagePromptTemplate.from_template("{input}")
             ]).partial(text=doc_content)
 
-            conversation = ConversationChain(
-                llm=llm,
-                prompt=prompt,
-                memory=memory,
-                verbose = True
+            chain = prompt | llm
+
+            def get_history(session_id: str):
+                return DjangoDBChatMessageHistory(session_id=session_id)
+
+            conversation = RunnableWithMessageHistory(
+                chain,
+                get_history,
+                input_messages_key="input",
+                history_messages_key="history"
             )
 
-            ai_response = conversation.predict(input=human_message)
+            ai_response = conversation.invoke(
+                {"input": human_message},
+                config={"configurable": {"session_id": session_id}},
+            )
 
-            return Response({'response': ai_response}, status=status.HTTP_200_OK)
+            return Response({'response': ai_response.content}, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
