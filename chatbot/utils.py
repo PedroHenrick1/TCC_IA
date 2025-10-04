@@ -9,7 +9,6 @@ def process_pdfs_in_folder(folder_path: str):
     files = chain(folder.glob("*.pdf"), folder.glob("*.docx"), folder.glob("*.txt"), folder.glob("*.csv"))
 
     for pdf_file in files:
-        print('passei antes do file_hash')
         file_hash = ProcessedDocument.calculate_hash(pdf_file)
         doc_entry = ProcessedDocument.objects.filter(file_path=str(pdf_file)).first()
 
@@ -19,14 +18,14 @@ def process_pdfs_in_folder(folder_path: str):
             continue
 
         print(f"Processando: {pdf_file.name}")
-        result = converter.convert(str(pdf_file)).document
-        content = result.export_to_markdown()
+        result = converter.convert(str(pdf_file)).document # Converte o documento em partes para ficar mais fácil da IA entender
+        content = result.export_to_markdown() # Exporta em formado .MD
 
-        if doc_entry:
+        if doc_entry: # Se o arquivo já foi criado e deseja modificar entre aqui
             doc_entry.file_hash = file_hash
             doc_entry.content = content
             doc_entry.save()
-        else:
+        else: # Se o arquivo não foi criado 
             ProcessedDocument.objects.create(
                 file_path=str(pdf_file),
                 file_hash=file_hash,
